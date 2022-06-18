@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
         port_scan(argv[1], port_num);
         printf("\nEnd.\n");
     }
-    else {/* 上二つの条件に当てはまらかった場合の分岐 */
+    else {/* 上三つの条件に当てはまらかった場合の分岐 */
         printf("Error: Please specify the options properly.\n");
         return 1;
     }
