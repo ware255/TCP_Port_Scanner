@@ -229,7 +229,8 @@ int main(int argc, char *argv[])
     else if(strcmp(argv[2], "--port") == 0 && argc >= 3){
         int port_num;
         try {
-            port_num = (atoi(argv[3]) <=  1 && atoi(argv[3]) >=  65535) ? 65535 : 1;
+            port_num = (atoi(argv[3]) >=  65535) ? 65535 : atoi(argv[3]);
+            if(port_num < 1) port_num = 1;
         }
         catch (...) {
             printf("Error: Enter the appropriate value.\n");
