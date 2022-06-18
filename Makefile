@@ -1,5 +1,5 @@
 tcp_port_scanner:
-    g++ src/main.cpp -o tcp_port_scanner -Wall
+	g++ src/main.cpp -o tcp_port_scanner
 
 clean:
-    rm -fr tcp_port_scanner
+	rm -f tcp_port_scanner
