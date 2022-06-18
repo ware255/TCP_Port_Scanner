@@ -5,3 +5,8 @@
 ```
 $ make
 ```
+
+## 使い方
+```
+$ ./tcp_port_scanner <ip address> <mode: --fast, --all, --port [number]>
+```
