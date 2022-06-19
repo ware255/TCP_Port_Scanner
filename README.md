@@ -4,6 +4,7 @@
 
 ### インスール方法
 ```
+$ sudo apt install g++ make
 $ git clone https://github.com/ware255/TCP_Port_Scanner.git
 $ cd TCP_Port_Scanner
 $ make
