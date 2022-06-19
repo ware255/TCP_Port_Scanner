@@ -1,6 +1,6 @@
 /*
  * 参考にしたもの
- * http://capm-network.com/?tag=C%E8%A8%80%E8%AA%9E-%E3%82%BD%E3%82%B1%E3%83%83%E3%83%88%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0_TCP%E3%83%9D%E3%83%BC%E3%83%88%E3%82%B9%E3%82%AD%E3%83%A3%E3%83%B3
+ * https://x.gd/otintin_world
  */
 #include <cstdio>
 #include <cstdlib>
@@ -170,32 +170,6 @@ void port_scan(char *ipaddr, int &start_port)
 }
 
 /*
- * IPアドレスの名前解決を行う。
- */
-int resolve_ipaddr(char *ipaddr)
-{
-    struct hostent *host;
-    struct in_addr addr;
-    
-    /* 文字列表現のIPアドレスをバイナリ値に変換する */
-    addr.s_addr = inet_addr(ipaddr);
-    
-    /* ホスト名かIPアドレスの調査からIPアドレスの取得 */
-    if (inet_aton(ipaddr, &addr) == 0){
-        if((host = gethostbyname(ipaddr)) == NULL){
-            return 1;
-        }
-    }
-    else {
-        if((host = gethostbyaddr((const char *)&addr.s_addr, sizeof(addr.s_addr), AF_INET)) == NULL){
-            return 1;
-        }
-    }
-    
-    return 0;
-}
-
-/*
  * main関数
  * 注意:自作関数とはちょっとだけ仕様が異なります。
  */
@@ -207,43 +181,58 @@ int main(int argc, char *argv[])
         return 1;/* エラーの場合、カーネルに1を返す */
     }
     
-    /* 接続先を確認する */
-    if((rc = resolve_ipaddr(argv[1])) != 0){
-        fprintf(stderr, "Error: Failed to connect to %s\n", argv[1]);
+    /* IPアドレスの解決に使用 */
+    struct addrinfo hints, *res;
+    struct in_addr addr;
+    int err;
+    
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_family   = AF_INET;
+    
+    /* IPアドレスの取得 */
+    if((err = getaddrinfo(argv[1], NULL, &hints, &res)) != 0){
+    	fprintf(stderr, "Error: Failed to connect to %s\n", inet_ntoa(addr));
         return 1;
     }
+    
+    addr.s_addr= ((struct sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
     
     /* --fast と --all で分岐します */
     if(strcmp(argv[2], "--fast") == 0){
         /* ポートは1番から5000番まで指定してスキャン */
-        printf("Scanning for %s\n\n", argv[1]);
-        ports_scan(argv[1], 1, 1024);
+        printf("Scanning for %s\n\n", inet_ntoa(addr));
+        ports_scan(argv[1], 1, 1023);
         printf("\nEnd.\n");
     }
     else if(strcmp(argv[2], "--all") == 0){
         /* ポートは1番から65535番まで指定してスキャン */
-        printf("Scanning for %s\n\n", argv[1]);
-        ports_scan(argv[1], 1, 65535);
-        printf("\nEnd.\n");
+        printf("Scanning for %s\n\n", inet_ntoa(addr));
+    	ports_scan(argv[1], 1, 65535);
+    	printf("\nEnd.\n");
     }
     else if(strcmp(argv[2], "--port") == 0 && argc >= 3){
-        int port_num;
-        try {
+    	int port_num;
+        try{
+            /* 三項演算子(if文と似ているやつ) */
             port_num = (atoi(argv[3]) >=  65535) ? 65535 : atoi(argv[3]);
             if(port_num < 1) port_num = 1;
         }
-        catch (...) {
-            printf("Error: Enter the appropriate value.\n");
+        catch(...){
+        	printf("Error: Enter the appropriate value.\n");
             return 1;
         }
-        printf("Scanning for %s\n\n", argv[1]);
-        port_scan(argv[1], port_num);
-        printf("\nEnd.\n");
+        printf("Scanning for %s\n\n", inet_ntoa(addr));
+    	port_scan(argv[1], port_num);
+    	printf("\nEnd.\n");
     }
     else {/* 上三つの条件に当てはまらかった場合の分岐 */
-        printf("Error: Please specify the options properly.\n");
-        return 1;
+    	printf("Error: Please specify the options properly.\n");
+    	return 1;
     }
+    
+    /* 取得した情報を解放 */
+    freeaddrinfo(res);
     
     return 0;/* 正常に終了できたならカーネルに0を返す */
 }
