@@ -202,13 +202,13 @@ int main(int argc, char *argv[])
     if(strcmp(argv[2], "--fast") == 0){
         /* ポートは1番から5000番まで指定してスキャン */
         printf("Scanning for %s\n\n", inet_ntoa(addr));
-        ports_scan(argv[1], 1, 1023);
+        ports_scan(inet_ntoa(addr), 1, 1023);
         printf("\nEnd.\n");
     }
     else if(strcmp(argv[2], "--all") == 0){
         /* ポートは1番から65535番まで指定してスキャン */
         printf("Scanning for %s\n\n", inet_ntoa(addr));
-    	ports_scan(argv[1], 1, 65535);
+    	ports_scan(inet_ntoa(addr), 1, 65535);
     	printf("\nEnd.\n");
     }
     else if(strcmp(argv[2], "--port") == 0 && argc >= 3){
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         printf("Scanning for %s\n\n", inet_ntoa(addr));
-    	port_scan(argv[1], port_num);
+    	port_scan(inet_ntoa(addr), port_num);
     	printf("\nEnd.\n");
     }
     else {/* 上三つの条件に当てはまらかった場合の分岐 */
