@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     
     /* --fast と --all で分岐します */
     if(strcmp(argv[2], "--fast") == 0){
-        /* ポートは1番から5000番まで指定してスキャン */
+        /* ポートは1番から1023番まで指定してスキャン */
         printf("Scanning for %s\n\n", inet_ntoa(addr));
         ports_scan(inet_ntoa(addr), 1, 1023);
         printf("\nEnd.\n");
