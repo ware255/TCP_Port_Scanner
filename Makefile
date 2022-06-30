@@ -1,5 +1,10 @@
+TARGET = tcp_port_scanner
+CC     = g++
+SRCS   = src/main.cpp
+CFLAG  = -Wall
+
 tcp_port_scanner:
-	g++ src/main.cpp -o tcp_port_scanner
+	$(CC) $(SRCS) -o $(TARGET) $(CFLAG)
 
 clean:
-	rm -f tcp_port_scanner
+	rm -f $(TARGET)
