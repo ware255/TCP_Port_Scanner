@@ -26,7 +26,7 @@ int rc, sock;
  */
 int create_timeout_socket()
 {
-    if((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+    if((::sock = socket(AF_INET, SOCK_STREAM, 0)) < 0){
         perror("socket");
         return -1;
     }
@@ -35,15 +35,15 @@ int create_timeout_socket()
     struct timeval send_tv;
     send_tv.tv_sec  = 1;/* 1秒に設定 */
     send_tv.tv_usec = 0;
-    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &send_tv, sizeof(send_tv));
+    setsockopt(::sock, SOL_SOCKET, SO_SNDTIMEO, &send_tv, sizeof(send_tv));
     
     /* 受信タイムアウトを設定する */
     struct timeval recv_tv;
     recv_tv.tv_sec = 5;/* 5秒に設定 */
     recv_tv.tv_sec = 0;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &recv_tv, sizeof(recv_tv));
+    setsockopt(::sock, SOL_SOCKET, SO_RCVTIMEO, &recv_tv, sizeof(recv_tv));
     
-    return sock;
+    return ::sock;
 }
 
 /*
@@ -52,17 +52,17 @@ int create_timeout_socket()
 int check_connect(int* socks, struct sockaddr *dest, size_t dest_size)
 {
     /* socksがNULLではないか確認(ポインタ渡しの場合) */
-	  if(socks == NULL){
-        perror("Error");
-        exit(1);
+    if(socks == NULL){
+    	perror("Error");
+    	exit(1);
     }
     
     errno = 0;
     /* 接続だぁぁぁあ！ */
-    rc = connect(*socks, dest, dest_size);
+    ::rc = connect(*socks, dest, dest_size);
     
     /*接続できたお(＾＾) */
-    if(rc == 0){
+    if(::rc == 0){
         return PS_CONNECT;
     }
     
@@ -85,7 +85,7 @@ int connect_to_port(char *ipaddr, int &n_port)
 {
     struct sockaddr_in dest;
     
-    if((sock = create_timeout_socket()) < 0){
+    if((::sock = create_timeout_socket()) < 0){
         return PS_ERROR;
     }
     
@@ -96,12 +96,12 @@ int connect_to_port(char *ipaddr, int &n_port)
     dest.sin_addr.s_addr = inet_addr(ipaddr);
     
     /* 接続出来るかチェック */
-    rc = check_connect(&sock, (struct sockaddr *)&dest, sizeof(dest));
+    ::rc = check_connect(&::sock, (struct sockaddr *)&dest, sizeof(dest));
     
     /* ソケットを閉じる */
-    close(sock);
+    close(::sock);
     
-    return rc;
+    return ::rc;
 }
 
 /*
@@ -129,15 +129,15 @@ void ports_scan(char *ipaddr, int start_port, int end_port)
     
     for(int port_num{start_port}; port_num < end_port; port_num++){
         /* ポートスキャン実行 */
-        rc = (*ctp)(ipaddr, port_num);
+        ::rc = (*ctp)(ipaddr, port_num);
         
         /* エラー時には強制終了する */
-        if(rc == PS_ERROR){
+        if(::rc == PS_ERROR){
             exit(1);
         }
         
         /* 接続できればポート情報を出力する */
-        if(rc == PS_CONNECT){
+        if(::rc == PS_CONNECT){
             print_portname(port_num);
         }
     }
@@ -153,15 +153,15 @@ void port_scan(char *ipaddr, int &start_port)
     int(*ctp)(char*, int&) = &connect_to_port;
     
     /* ポートスキャン実行 */
-    rc = (*ctp)(ipaddr, start_port);
+    ::rc = (*ctp)(ipaddr, start_port);
     
     /* エラー時には強制終了する */
-    if(rc == PS_ERROR){
+    if(::rc == PS_ERROR){
         exit(1);
     }
     
     /* 接続できればポート情報を出力する */
-    if(rc == PS_CONNECT){
+    if(::rc == PS_CONNECT){
         print_portname(start_port);
     }
     else {
@@ -233,6 +233,7 @@ int main(int argc, char *argv[])
     
     /* 取得した情報を解放 */
     freeaddrinfo(res);
+    res = nullptr;
     
     return 0;/* 正常に終了できたならカーネルに0を返す */
 }
